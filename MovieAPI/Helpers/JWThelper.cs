@@ -1,6 +1,6 @@
 ﻿namespace MovieAPI.Helpers
 {
-    public class JWT
+    public class JWThelper
     {
         public string Key { get; set; }
         public string Issuer { get; set; }

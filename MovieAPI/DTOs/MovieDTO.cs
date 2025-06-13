@@ -1,4 +1,4 @@
-﻿namespace MoviesAPI.DTO
+﻿namespace MovieAPI.DTOs
 {
     public class MovieDTO
     {

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MovieAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class addinitialCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,8 +32,6 @@ namespace MovieAPI.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -174,6 +172,29 @@ namespace MovieAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RefreshToken",
+                columns: table => new
+                {
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Expiration = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RevokedOn = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshToken", x => new { x.ApplicationUserId, x.Id });
+                    table.ForeignKey(
+                        name: "FK_RefreshToken_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Movies",
                 columns: table => new
                 {
@@ -195,6 +216,15 @@ namespace MovieAPI.Migrations
                         principalTable: "Genres",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "b4a2bf0a-074f-4b60-a950-c1d3e10e028e", "7b9cf762-f7d3-400f-9b24-b62f0bfda476", "Admin", "ADMIN" },
+                    { "ff1166a6-6a4a-416e-8300-a70e3bfe2709", "bdc4ff4d-97bf-40d3-a318-e024a4b1d107", "User", "USER" }
                 });
 
             migrationBuilder.InsertData(
@@ -276,13 +306,16 @@ namespace MovieAPI.Migrations
                 name: "Movies");
 
             migrationBuilder.DropTable(
+                name: "RefreshToken");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Genres");
 
             migrationBuilder.DropTable(
-                name: "Genres");
+                name: "AspNetUsers");
         }
     }
 }

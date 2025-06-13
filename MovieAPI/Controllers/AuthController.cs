@@ -1,6 +1,7 @@
-﻿using MovieAPI.Services.@interface;
+﻿
+using MoviesAPI.DTOs;
 
-namespace MovieAPI.Controllers
+namespace MoviesAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -12,70 +13,91 @@ namespace MovieAPI.Controllers
         {
             _authService = authService;
         }
-        
+
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody]RegisterAuth model)
+        public async Task<IActionResult> RegisterAsync([FromBody] RegisterDto registerDto)
         {
-            var result = await _authService.Register(model);
-            if(!result.IsAuthenticated)
-                return BadRequest(result.Massage);
-            return Ok(result);
-        }
-        
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] TokenRequestModel model)
-        {
-            var result = await _authService.Login(model);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.RegisterAsync(registerDto);
 
             if (!result.IsAuthenticated)
-                return BadRequest(result.Massage);
+                return BadRequest(result.Message ?? "Registration failed.");
 
             if (!string.IsNullOrEmpty(result.RefreshToken))
                 SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
 
             return Ok(result);
         }
-        
-        [HttpPost("addrole")]
-        public async Task<IActionResult> AddRole([FromBody] AddRoleModel model)
+
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginDto loginDto)
         {
-            var result = await _authService.AddRole(model);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            if (!string.IsNullOrEmpty(result))
-                return BadRequest(result);
-            return Ok(model);
-        }
-
-
-        [HttpGet("refreshToken")]
-        public async Task<IActionResult> RefreshToken()
-        {
-            var refreshToken = Request.Cookies["refreshToken"];
-
-            var result = await _authService.RefreshToken(refreshToken);
+            var result = await _authService.LoginAsync(loginDto);
 
             if (!result.IsAuthenticated)
-                return BadRequest(result);
+                return BadRequest(result.Message ?? "Login failed.");
 
-            SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+            if (!string.IsNullOrEmpty(result.RefreshToken))
+                SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
 
             return Ok(result);
         }
 
-        [HttpPost("revokeToken")]
-        public async Task<IActionResult> RevokeToken([FromBody] RevokeToken model)
+        [HttpPost("Logout")]
+        public async Task<IActionResult> RevokeTokenAsync([FromBody] RevokeTokenDto model)
         {
-            var token = model.Token ?? Request.Cookies["refreshToken"];
-
+            var token = model.RefreshToken ?? Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(token))
-                return BadRequest("Token is required!");
+                return BadRequest("Refresh token is missing.");
 
-            var result = await _authService.RevokeToken(token);
+            var result = await _authService.RevokeTokenAsync(token);
 
             if (!result)
-                return BadRequest("Token is invalid!");
+                return BadRequest("Failed to LogOut.");
 
-            return Ok();
+            Response.Cookies.Delete("refreshToken");
+
+            return Ok(new { message = "LogOut successfully." });
+        }
+
+
+        [HttpPost("add-role")]
+        public async Task<IActionResult> AddRoleAsync([FromBody] AddRoleDto model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.AddRoleAsync(model);
+
+            if (!string.IsNullOrEmpty(result))
+                return BadRequest(new { error = result });
+
+            return Ok(new { message = "Role added successfully.", model });
+        }
+
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenDto model)
+        {
+            var RefreshToken = model.RefreshToken ?? Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(RefreshToken))
+                return BadRequest("Refresh token is missing.");
+
+            var result = await _authService.RefreshTokenAsync(RefreshToken);
+
+            if (result is null || !result.IsAuthenticated)
+                return BadRequest(result?.Message ?? "Token refresh failed.");
+
+            if (!string.IsNullOrEmpty(result.RefreshToken))
+                SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+
+            return Ok(result);
         }
 
         private void SetRefreshTokenInCookie(string refreshToken, DateTime expires)
@@ -83,12 +105,8 @@ namespace MovieAPI.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Expires = expires.ToLocalTime(),
-                Secure = true,
-                IsEssential = true,
-                SameSite = SameSiteMode.None
+                Expires = expires.ToLocalTime()
             };
-
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
     }

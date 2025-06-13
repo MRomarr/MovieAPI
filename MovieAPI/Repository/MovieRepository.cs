@@ -1,5 +1,4 @@
-﻿using MovieAPI.Services.@interface;
-
+﻿
 namespace MoviesAPI.Repository
 {
     public class MovieRepository:IMovieRepository

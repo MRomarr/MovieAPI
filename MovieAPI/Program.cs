@@ -1,6 +1,7 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using MovieAPI.Services.@interface;
+using Microsoft.Extensions.Options;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,19 +13,28 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("no conntecion string was found");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MoviesDatabase")));
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.Configure<JWT>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<JWThelper>(builder.Configuration.GetSection("JwtSettings"));
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();    
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.Password.RequiredLength = 1;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireDigit= false;
+
+}).AddEntityFrameworkStores<ApplicationDbContext>();  
+
 builder.Services.AddAuthentication(
     options =>
     {
+        
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     })
@@ -44,6 +54,7 @@ builder.Services.AddAuthentication(
             ClockSkew = TimeSpan.Zero
         };
     });
+
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 

@@ -1,4 +1,5 @@
-﻿namespace MoviesAPI.Repository
+﻿
+namespace MoviesAPI.Repository
 {
     public class GenreRepository : IGenreRepository
     {

@@ -1,6 +1,6 @@
-﻿namespace MovieAPI.Model
+﻿namespace MoviesAPI.DTOs
 {
-    public class AddRoleModel
+    public class AddRoleDto
     {
         public string UserId { get; set; }
         public string RoleName { get; set; }

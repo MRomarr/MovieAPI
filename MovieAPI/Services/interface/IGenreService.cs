@@ -1,4 +1,5 @@
-﻿namespace MovieAPI.Services.@interface
+﻿
+namespace MovieAPI.Services.@interface
 {
     public interface IGenreService
     {

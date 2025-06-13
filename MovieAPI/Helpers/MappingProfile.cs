@@ -1,4 +1,5 @@
-﻿namespace MoviesAPI.Helpers
+﻿
+namespace MoviesAPI.Helpers
 {
     public class MappingProfile : Profile
     {

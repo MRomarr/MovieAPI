@@ -1,5 +1,4 @@
-﻿using MovieAPI.Services.@interface;
-
+﻿
 namespace MovieAPI.Services
 {
     public class MovieService : IMovieService

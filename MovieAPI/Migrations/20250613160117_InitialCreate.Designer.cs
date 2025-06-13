@@ -12,8 +12,8 @@ using MoviesAPI.Data;
 namespace MovieAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250610180015_RefreshToken")]
-    partial class RefreshToken
+    [Migration("20250613160117_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -192,16 +192,6 @@ namespace MovieAPI.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -399,10 +389,10 @@ namespace MovieAPI.Migrations
                             b1.Property<DateTime>("CreatedOn")
                                 .HasColumnType("datetime2");
 
-                            b1.Property<DateTime>("Expairation")
+                            b1.Property<DateTime>("Expiration")
                                 .HasColumnType("datetime2");
 
-                            b1.Property<DateTime>("RevokedOn")
+                            b1.Property<DateTime?>("RevokedOn")
                                 .HasColumnType("datetime2");
 
                             b1.Property<string>("Token")

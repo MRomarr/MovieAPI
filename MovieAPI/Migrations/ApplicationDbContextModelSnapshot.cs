@@ -190,16 +190,6 @@ namespace MovieAPI.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -396,10 +386,10 @@ namespace MovieAPI.Migrations
                             b1.Property<DateTime>("CreatedOn")
                                 .HasColumnType("datetime2");
 
-                            b1.Property<DateTime>("Expairation")
+                            b1.Property<DateTime>("Expiration")
                                 .HasColumnType("datetime2");
 
-                            b1.Property<DateTime>("RevokedOn")
+                            b1.Property<DateTime?>("RevokedOn")
                                 .HasColumnType("datetime2");
 
                             b1.Property<string>("Token")
