@@ -2,6 +2,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using MovieAPI.Services.@interface;
 using Microsoft.Extensions.Options;
+using MovieAPI.Middlewares;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,7 +76,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseMiddleware<RateLimitingMiddleweare>();
+app.UseMiddleware<ProfilingMiddleweares>();
 app.MapControllers();
 
 app.Run();
